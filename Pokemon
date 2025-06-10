@@ -1,0 +1,72 @@
+from tkinter import *
+from tkinter import ttk, messagebox
+from random import choice, shuffle
+
+LETTERS = list("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+NUMBERS = list("0123456789")
+SYMBOLS = list('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~')
+SPACES = [' ']
+
+def generate_password():
+    try:
+        length = int(length_spinbox.get())
+        if length < 1:
+            raise ValueError
+    except ValueError:
+        messagebox.showerror("Ошибка", "Введите корректное число длины (не меньше 1)")
+        return
+
+    include_numbers = var_numbers.get()
+    include_symbols = var_symbols.get()
+    include_spaces = var_spaces.get()
+
+    char_pool = LETTERS[:]
+    required_chars = []
+
+    if include_numbers:
+        char_pool += NUMBERS
+        required_chars.append(choice(NUMBERS))
+    if include_symbols:
+        char_pool += SYMBOLS
+        required_chars.append(choice(SYMBOLS))
+    if include_spaces:
+        char_pool += SPACES
+        required_chars.append(choice(SPACES))
+
+    if length < len(required_chars):
+        messagebox.showerror("Ошибка", f"Длина пароля должна быть не меньше {len(required_chars)}")
+        return
+
+    password_chars = required_chars[:]
+    password_chars += [choice(char_pool) for _ in range(length - len(required_chars))]
+    shuffle(password_chars)
+
+    password_entry.delete(0, END)
+    password_entry.insert(0, ''.join(password_chars))
+
+
+root = Tk()
+root.title("Генератор паролей")
+root.geometry("350x280")
+root.resizable(False, False)
+
+Label(root, text="Генератор паролей", font=("Arial", 16, "bold")).pack(pady=10)
+
+Label(root, text="Длина пароля:", font=("Arial", 12)).pack()
+length_spinbox = ttk.Spinbox(root, from_=1, to=100, width=5, justify=CENTER)
+length_spinbox.set(12)
+length_spinbox.pack(pady=5)
+
+var_numbers = IntVar()
+ttk.Checkbutton(root, text="Включить цифры", variable=var_numbers).pack(anchor=W, padx=20)
+var_symbols = IntVar()
+ttk.Checkbutton(root, text="Включить спецсимволы", variable=var_symbols).pack(anchor=W, padx=20)
+var_spaces = IntVar()
+ttk.Checkbutton(root, text="Включать пробелы", variable=var_spaces).pack(anchor=W, padx=20)
+
+ttk.Button(root, text="Сгенерировать", command=generate_password).pack(pady=15)
+
+password_entry = ttk.Entry(root, font=("Consolas", 12), justify=CENTER)
+password_entry.pack(fill=X, padx=20, pady=5)
+
+root.mainloop()
